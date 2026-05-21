@@ -87,6 +87,6 @@ public class LivroService {
     }
 
     public void deleteById(Long id) {
-        delete(findById(id).get());
+        findById(id).ifPresent(this::delete);
     }
 }

@@ -2,12 +2,14 @@ package br.univille.poo2.api.controller;
 
 import br.univille.poo2.api.entity.Livro;
 import br.univille.poo2.api.service.LivroService;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.server.ResponseStatusException;
 
 @Controller
 public class LivroController {
@@ -41,7 +43,8 @@ public class LivroController {
     @GetMapping("/livros/editar/{id}")
     public ModelAndView editar(@PathVariable Long id) {
         var mv = new ModelAndView("livros/editar");
-        mv.addObject("objeto", service.findById(id).get());
+        mv.addObject("objeto", service.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Livro não encontrado.")));
         return mv;
     }
 
