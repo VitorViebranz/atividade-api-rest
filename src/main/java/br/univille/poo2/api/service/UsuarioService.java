@@ -2,9 +2,6 @@ package br.univille.poo2.api.service;
 
 import br.univille.poo2.api.entity.Usuario;
 import br.univille.poo2.api.repository.UsuarioRepository;
-import java.util.Optional;
-
-import jakarta.persistence.EntityNotFoundException;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.regex.Pattern;
+import java.util.Optional;
 
 @Service
 public class UsuarioService {
@@ -68,7 +65,18 @@ public class UsuarioService {
         return userRep.save(usuarioExistente);
     }
 
+    public Usuario save(Usuario usuario) {
+        if (usuario.getId() == null) {
+            return insert(usuario);
+        }
+        return update(usuario);
+    }
+
     public void delete(Usuario usuario){
         userRep.delete(usuario);
+    }
+
+    public void deleteById(Long id) {
+        findById(id).ifPresent(this::delete);
     }
 }
