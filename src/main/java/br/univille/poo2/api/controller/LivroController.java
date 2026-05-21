@@ -2,51 +2,52 @@ package br.univille.poo2.api.controller;
 
 import br.univille.poo2.api.entity.Livro;
 import br.univille.poo2.api.service.LivroService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.ModelAndView;
 
-import java.util.List;
-
-@RestController
-@RequestMapping("/api/livros")
+@Controller
 public class LivroController {
 
-    @Autowired
-    private LivroService service;
+    private final LivroService service;
 
-    @GetMapping
-    public List<Livro> listar() {
-        return service.findAll();
+    public LivroController(LivroService service) {
+        this.service = service;
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Livro> buscarPorId(@PathVariable Long id) {
-        return service.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @GetMapping("/livros")
+    public ModelAndView index() {
+        var mv = new ModelAndView("livros/index");
+        mv.addObject("lista", service.findAll());
+        return mv;
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Livro criar(@RequestBody Livro livro) {
-        return service.insert(livro);
+    @GetMapping("/livros/novo")
+    public ModelAndView novo() {
+        var mv = new ModelAndView("livros/novo");
+        mv.addObject("objeto", new Livro());
+        return mv;
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Livro> atualizar(@PathVariable Long id, @RequestBody Livro livro) {
-        livro.setId(id);
-        return ResponseEntity.ok(service.update(livro));
+    @PostMapping("/livros/salvar")
+    public ModelAndView salvar(@ModelAttribute Livro livro) {
+        service.save(livro);
+        return new ModelAndView("redirect:/livros");
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> excluir(@PathVariable Long id) {
-        var livroOpt = service.findById(id);
-        if (livroOpt.isPresent()) {
-            service.delete(livroOpt.get());
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.notFound().build();
+    @GetMapping("/livros/editar/{id}")
+    public ModelAndView editar(@PathVariable Long id) {
+        var mv = new ModelAndView("livros/editar");
+        mv.addObject("objeto", service.findById(id).get());
+        return mv;
+    }
+
+    @GetMapping("/livros/excluir/{id}")
+    public ModelAndView excluir(@PathVariable Long id) {
+        service.deleteById(id);
+        return new ModelAndView("redirect:/livros");
     }
 }

@@ -75,7 +75,18 @@ public class LivroService {
         return repository.save(livroExistente);
     }
 
+    public Livro save(Livro livro) {
+        if (livro.getId() == null) {
+            return insert(livro);
+        }
+        return update(livro);
+    }
+
     public void delete(Livro livro){
         repository.delete(livro);
+    }
+
+    public void deleteById(Long id) {
+        delete(findById(id).get());
     }
 }

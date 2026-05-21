@@ -1,6 +1,14 @@
-# 📚 API de Biblioteca
+# 📚 Biblioteca MVC com Spring Boot + Thymeleaf
 
-Uma API REST para o gerenciamento de uma biblioteca, permitindo controlar **usuários**, **livros** e **empréstimos**.
+Aplicação Spring Boot para o gerenciamento de biblioteca com interface web MVC (Thymeleaf), permitindo controlar **usuários**, **livros** e **empréstimos**.
+
+---
+
+## 🖥️ Páginas MVC
+
+- `/` → CRUD de usuários
+- `/livros` → CRUD de livros
+- `/emprestimos` → empréstimos e devoluções
 
 ---
 

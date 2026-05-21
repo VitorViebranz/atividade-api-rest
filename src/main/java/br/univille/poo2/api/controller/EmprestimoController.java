@@ -1,41 +1,68 @@
 package br.univille.poo2.api.controller;
 
-import br.univille.poo2.api.entity.Emprestimo;
 import br.univille.poo2.api.service.EmprestimoService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
-import java.util.List;
-import java.util.Map;
+import br.univille.poo2.api.service.LivroService;
+import br.univille.poo2.api.service.UsuarioService;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.ModelAndView;
 
-@RestController
-@RequestMapping("/api/emprestimos")
+@Controller
 public class EmprestimoController {
 
-    @Autowired
-    private EmprestimoService service;
+    private final EmprestimoService service;
+    private final UsuarioService usuarioService;
+    private final LivroService livroService;
 
-    @GetMapping
-    public List<Emprestimo> listar() {
-        return service.findAll();
+    public EmprestimoController(EmprestimoService service, UsuarioService usuarioService, LivroService livroService) {
+        this.service = service;
+        this.usuarioService = usuarioService;
+        this.livroService = livroService;
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Emprestimo emprestar(@RequestBody Map<String, Long> dados) {
-        Long usuarioId = dados.get("usuarioId");
-        Long livroId = dados.get("livroId");
+    @GetMapping("/emprestimos")
+    public ModelAndView index() {
+        var mv = new ModelAndView("emprestimos/index");
+        mv.addObject("lista", service.findAll());
+        mv.addObject("usuarios", usuarioService.findAll());
+        mv.addObject("livros", livroService.findAll());
+        mv.addObject("objeto", new EmprestimoForm());
+        return mv;
+    }
 
-        if (usuarioId == null || livroId == null) {
-            throw new org.springframework.web.server.ResponseStatusException(
-                    HttpStatus.BAD_REQUEST, "É necessário informar usuarioId e livroId.");
+    @PostMapping("/emprestimos/salvar")
+    public ModelAndView salvar(@ModelAttribute EmprestimoForm objeto) {
+        service.realizarEmprestimo(objeto.getUsuarioId(), objeto.getLivroId());
+        return new ModelAndView("redirect:/emprestimos");
+    }
+
+    @GetMapping("/emprestimos/devolver/{id}")
+    public ModelAndView devolver(@PathVariable Long id) {
+        service.devolver(id);
+        return new ModelAndView("redirect:/emprestimos");
+    }
+
+    public static class EmprestimoForm {
+        private Long usuarioId;
+        private Long livroId;
+
+        public Long getUsuarioId() {
+            return usuarioId;
         }
 
-        return service.realizarEmprestimo(usuarioId, livroId);
-    }
+        public void setUsuarioId(Long usuarioId) {
+            this.usuarioId = usuarioId;
+        }
 
-    @PatchMapping("/{id}/devolver")
-    public Emprestimo devolver(@PathVariable Long id) {
-        return service.devolver(id);
+        public Long getLivroId() {
+            return livroId;
+        }
+
+        public void setLivroId(Long livroId) {
+            this.livroId = livroId;
+        }
     }
 }
